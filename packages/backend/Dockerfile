@@ -30,8 +30,6 @@ USER node
 WORKDIR /app
 
 COPY --from=packages --chown=node:node /app .
-COPY --chown=node:node .yarn ./.yarn
-COPY --chown=node:node .yarnrc.yml backstage.json ./
 
 RUN --mount=type=cache,target=/home/node/.cache/yarn,sharing=locked,uid=1000,gid=1000 \
     yarn install --immutable
@@ -41,8 +39,8 @@ COPY --chown=node:node . .
 RUN yarn tsc
 RUN yarn build:backend
 
-# ---- 3단계: 실행 이미지 (운영 의존성과 빌드 결과만) ----
-FROM node:24-trixie-slim
+# ---- 3단계: 운영 의존성만 설치 (네이티브 모듈 빌드 도구는 이 단계에만 둔다) ----
+FROM node:24-trixie-slim AS deps
 
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     --mount=type=cache,target=/var/lib/apt,sharing=locked \
@@ -50,21 +48,36 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     apt-get install -y --no-install-recommends python3 g++ build-essential libsqlite3-dev && \
     rm -rf /var/lib/apt/lists/*
 
-# 실행은 권한이 가장 낮은 node 사용자로 한다
 USER node
 WORKDIR /app
 
-COPY --chown=node:node .yarn ./.yarn
-COPY --chown=node:node .yarnrc.yml backstage.json ./
-
-# 운영 모드로 전환
 ENV NODE_ENV=production
 
+COPY --from=packages --chown=node:node /app/.yarn ./.yarn
+COPY --from=packages --chown=node:node /app/.yarnrc.yml /app/backstage.json ./
+
+# 빌드가 만든 skeleton 은 개발 의존성을 뺀 package.json 모음이다. 원본 package.json 으로 설치하면
+# @types 같은 개발용 패키지까지 들어와 이미지가 3배로 커진다.
 COPY --from=build --chown=node:node /app/yarn.lock /app/package.json /app/packages/backend/dist/skeleton.tar.gz ./
 RUN tar xzf skeleton.tar.gz && rm skeleton.tar.gz
 
 RUN --mount=type=cache,target=/home/node/.cache/yarn,sharing=locked,uid=1000,gid=1000 \
     yarn workspaces focus --all --production && rm -rf "$(yarn cache clean)"
+
+# ---- 4단계: 실행 이미지 (컴파일러 없이 운영 의존성과 빌드 결과만) ----
+FROM node:24-trixie-slim
+
+# 실행은 권한이 가장 낮은 node 사용자로 한다
+USER node
+WORKDIR /app
+
+# 운영 모드로 전환
+ENV NODE_ENV=production
+
+# 패키지 목록(package.json)과 yarn.lock, 2단계에서 설치한 운영 의존성
+COPY --from=build --chown=node:node /app/yarn.lock /app/package.json /app/backstage.json /app/packages/backend/dist/skeleton.tar.gz ./
+RUN tar xzf skeleton.tar.gz && rm skeleton.tar.gz
+COPY --from=deps --chown=node:node /app/node_modules ./node_modules
 
 # 백엔드 번들, 설정 파일, 카탈로그 정의
 COPY --from=build --chown=node:node /app/packages/backend/dist/bundle.tar.gz ./

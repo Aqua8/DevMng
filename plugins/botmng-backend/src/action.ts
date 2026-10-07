@@ -1,6 +1,6 @@
 import type { ActionsRegistryService } from '@backstage/backend-plugin-api/alpha';
 import { BotmngClient } from './botmngClient';
-import { resolveHealth } from './resolveHealth';
+import { CARD_STATUSES, resolveHealth } from './health';
 
 /**
  * MCP 도구로 노출되는 액션: BotMng 상태 조회.
@@ -23,14 +23,7 @@ export function registerHealthAction(
       input: z => z.object({}),
       output: z =>
         z.object({
-          status: z.enum([
-            'ok',
-            'warn',
-            'error',
-            'unreachable',
-            'unauthorized',
-            'not-configured',
-          ]),
+          status: z.enum(CARD_STATUSES),
           issues: z.array(z.string()),
           checkedAt: z.string(),
         }),

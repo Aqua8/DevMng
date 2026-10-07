@@ -13,11 +13,12 @@ docker build . -f packages/backend/Dockerfile -t devmng
 
 ## 구조 (멀티스테이지)
 
-| 단계       | 하는 일                                                                                |
-| ---------- | -------------------------------------------------------------------------------------- |
-| `packages` | 각 패키지의 `package.json`만 남긴다. 소스가 바뀌어도 의존성 설치 캐시가 유지된다       |
-| `build`    | 네이티브 모듈 빌드 도구를 설치하고 `yarn install --immutable`, `tsc`, `build:backend`  |
-| 최종       | 운영 의존성(`yarn workspaces focus --production`)과 번들, 설정, 카탈로그 정의만 담는다 |
+| 단계       | 하는 일                                                                                   |
+| ---------- | ----------------------------------------------------------------------------------------- |
+| `packages` | 각 패키지의 `package.json`만 남긴다. 소스가 바뀌어도 의존성 설치 캐시가 유지된다          |
+| `build`    | 네이티브 모듈 빌드 도구를 설치하고 `yarn install --immutable`, `tsc`, `build:backend`     |
+| `deps`     | 운영 의존성만 설치한다(`yarn workspaces focus --production`). 컴파일러는 이 단계에만 있다 |
+| 최종       | `deps`의 `node_modules`와 빌드 결과, 설정, 카탈로그 정의만 담는다. 컴파일러가 없다        |
 
 - `node` 사용자(권한이 낮은 계정)로 실행하고, `NODE_ENV=production`으로 동작한다.
 - `HEALTHCHECK`가 `/.backstage/health/v1/readiness`를 30초마다 확인한다.
@@ -43,6 +44,8 @@ docker compose down      # 종료 (데이터는 유지, 지우려면 down -v)
 
 ## 확인한 것
 
+- 정리 단계에서 운영 의존성 설치를 `deps` 단계로 분리해 실행 이미지에서 컴파일러를 뺐다. 이미지 크기가 **319MB에서 192MB**로 줄었고, 같은 방식으로 다시 실행해 동작을 확인했다(`better-sqlite3` 네이티브 모듈 로드 포함). 운영 의존성은 Backstage가 개발 의존성을 뺀 skeleton으로 설치해야 한다. 원본 `package.json`으로 설치하면 `@types` 같은 개발용 패키지까지 들어와 이미지가 3배가 된다.
+
 - 이미지: Postgres 컨테이너와 함께 실행해 헬스체크 `healthy`, 실행 사용자 `node`, readiness 200, MCP 도구 2개, 카탈로그 프로젝트 3개와 의존 관계, BotMng 상태 `ok`, 토큰 없는 MCP 요청 401, 로그에 비밀 값 없음, 이미지 안에 `.env`·`*.local.yaml` 없음.
 - `docker compose`: 포트가 `127.0.0.1`에만 바인딩됨(`docker port`), 브라우저에서 **게스트 로그인 → 카탈로그 → BotMng 페이지의 상태 카드("정상")**까지 동작.
 - 같은 네트워크의 다른 기기에서 접속이 막히는지는 직접 시도하지 않았다(확인한 것은 `127.0.0.1`로만 바인딩된다는 점).
@@ -54,3 +57,5 @@ docker compose down      # 종료 (데이터는 유지, 지우려면 down -v)
 - 게스트 로그인(`app-config.docker-local.yaml`)을 쓰지 않는다. 비밀번호가 없어서 주소를 아는 누구나 들어올 수 있다.
 - 접속 경로를 제한한다: VPN/터널(Tailscale, SSH 터널), Cloudflare Access, 또는 Backstage에 GitHub 같은 실제 인증을 붙인다.
 - HTTPS와 도메인을 설정한다 (이미지는 HTTP 7007만 연다).
+
+보안 점검 결과와 남겨 둔 위험은 [`docs/security.md`](security.md)에 정리했다.

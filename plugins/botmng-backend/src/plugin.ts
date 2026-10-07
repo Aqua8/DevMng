@@ -7,6 +7,7 @@ import { catalogServiceRef } from '@backstage/plugin-catalog-node';
 import { registerHealthAction } from './action';
 import { registerProjectsAction } from './projects';
 import { BotmngClient } from './botmngClient';
+import { readBotmngConfig } from './botmngConfig';
 import { createRouter } from './router';
 
 /**
@@ -37,18 +38,19 @@ export const botmngPlugin = createBackendPlugin({
         httpRouter,
         logger,
       }) {
-        const baseUrl = config.getOptionalString('botmng.baseUrl');
-        const password = config.getOptionalString('botmng.servicePassword');
-        if (!baseUrl || !password) {
+        const botmng = readBotmngConfig(config);
+        if (!botmng) {
           logger.warn(
             'botmng.baseUrl 또는 botmng.servicePassword 가 없어 BotMng 상태는 not-configured 로 표시됩니다',
           );
         }
-        const client =
-          baseUrl && password
-            ? new BotmngClient({ baseUrl, password })
-            : undefined;
-        httpRouter.use(await createRouter({ httpAuth, client }));
+        const client = botmng
+          ? new BotmngClient({
+              baseUrl: botmng.baseUrl,
+              password: botmng.password,
+            })
+          : undefined;
+        httpRouter.use(createRouter({ httpAuth, client }));
         registerHealthAction(actionsRegistry, client);
         registerProjectsAction(actionsRegistry, { catalog, auth });
       },

@@ -13,6 +13,13 @@ backend:
   # all interfaces, the most permissive setting. The right value depends on your specific deployment.
   listen: ':7007'
 
+  # 화면과 API 가 같은 주소(7007)에서 서빙되므로 다른 출처의 접근은 허용하지 않는다.
+  # (개발용 기본값은 http://localhost:3000 과 모든 http(s) 주소로의 연결을 허용한다)
+  csp:
+    connect-src: ["'self'"]
+  cors:
+    origin: http://localhost:7007
+
   # config options: https://node-postgres.com/apis/client
   database:
     client: pg
