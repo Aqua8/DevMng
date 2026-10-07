@@ -12,11 +12,11 @@
 
 ## 구성
 
-| 파일 | 역할 |
-|---|---|
-| `src/plugin.tsx` | 엔티티 카드(`EntityCardBlueprint`) 등록, 주석 필터 |
-| `src/components/BotmngHealthCard` | 카드 화면 (조회, 주기 갱신, 새로고침) |
-| `src/status.ts` | 상태 → 한국어 이름·색 변환, 응답 모양 확인 (순수 함수) |
+| 파일                              | 역할                                                   |
+| --------------------------------- | ------------------------------------------------------ |
+| `src/plugin.tsx`                  | 엔티티 카드(`EntityCardBlueprint`) 등록, 주석 필터     |
+| `src/components/BotmngHealthCard` | 카드 화면 (조회, 주기 갱신, 새로고침)                  |
+| `src/status.ts`                   | 상태 → 한국어 이름·색 변환, 응답 모양 확인 (순수 함수) |
 
 ## 개발
 
