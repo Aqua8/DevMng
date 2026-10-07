@@ -143,6 +143,11 @@ integrations:
     #   apiBaseUrl: https://ghe.example.net/api/v3
     #   token: ${GHE_TOKEN}
 
+# BotMng 연동 (백엔드 플러그인이 읽는 값). 값은 환경 변수로만 받고 저장소에 올리지 않는다. .env.example 참고
+botmng:
+  baseUrl: ${BOTMNG_URL}
+  servicePassword: ${BOTMNG_SERVICE_PASSWORD} # BotMng의 서비스 계정(devmng) 비밀번호
+
 proxy:
   ### Example for how to add a proxy endpoint for the frontend.
   ### A typical reason to do this is to handle HTTPS and CORS for internal services.
