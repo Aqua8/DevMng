@@ -87,7 +87,7 @@ DevMng/
 - [x] BotMng 카탈로그 페이지에서 상태 카드가 실제 `/api/health` 값을 보여 준다.
 - [ ] BotMng를 꺼도 카드가 오류 상태를 표시하고 포털은 죽지 않는다.
 - [x] 플러그인 로직 단위 테스트 통과.
-- [ ] GitHub Actions에서 tsc, lint, test, build 통과.
+- [x] GitHub Actions에서 tsc, lint, test, build 통과.
 - [ ] Docker 이미지 빌드 성공.
 - [ ] Claude Code에서 MCP로 카탈로그를 조회한다.
 
