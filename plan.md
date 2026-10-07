@@ -85,11 +85,11 @@ DevMng/
 - [x] 로컬에서 포털이 뜨고 3개 프로젝트가 카탈로그에 보인다. (백엔드 API로 확인, 화면은 미확인)
 - [x] BotMng에서 서비스 계정은 `/api/health` 외 API가 거부되고, 그 계정의 접속 기록은 게스트 화면에 보이지 않는다.
 - [x] BotMng 카탈로그 페이지에서 상태 카드가 실제 `/api/health` 값을 보여 준다.
-- [ ] BotMng를 꺼도 카드가 오류 상태를 표시하고 포털은 죽지 않는다.
+- [x] BotMng를 꺼도 카드가 오류 상태를 표시하고 포털은 죽지 않는다. (연결 불가·인증 실패·설정 없음을 실제 화면에서 확인. 운영 BotMng를 끄는 대신 연결할 수 없는 주소로 재현)
 - [x] 플러그인 로직 단위 테스트 통과.
 - [x] GitHub Actions에서 tsc, lint, test, build 통과.
 - [x] Docker 이미지 빌드 성공.
-- [ ] Claude Code에서 MCP로 카탈로그를 조회한다.
+- [x] Claude Code에서 MCP로 카탈로그를 조회한다. (실제 `claude -p`로 확인, `docs/mcp.md`)
 
 ## 6. 작업 순서
 
