@@ -13,3 +13,6 @@ docs
 .env.*
 !.env.example
 *.local.yaml
+
+# Turborepo 로컬 캐시 (빌드 컨텍스트에 넣지 않는다)
+.turbo

@@ -39,19 +39,21 @@ jobs:
       - name: 타입 검사
         run: yarn tsc
 
-      - name: 린트
-        run: yarn lint:all
-
       - name: 서식 검사
         run: yarn prettier:check
 
-      - name: 단위 테스트
-        run: yarn test
-        env:
-          CI: 'true'
+      # 린트·테스트·빌드는 Turborepo 가 패키지별로 실행하고 결과를 .turbo 에 캐시한다.
+      # 입력(소스, 설정, yarn.lock)이 같은 패키지는 이전 실행의 결과를 다시 쓴다.
+      - name: Turborepo 캐시 복원
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: .turbo
+          key: turbo-${{ matrix.node }}-${{ github.sha }}
+          restore-keys: |
+            turbo-${{ matrix.node }}-
 
-      - name: 빌드
-        run: yarn build:all
+      - name: 린트·테스트·빌드 (Turborepo)
+        run: yarn verify
 
   docker:
     name: Docker 이미지 빌드
