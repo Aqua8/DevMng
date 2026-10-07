@@ -51,3 +51,17 @@ curl -s -X POST http://localhost:7007/api/mcp-actions/v1/devmng \
   -H "Content-Type: application/json" -H "Accept: application/json, text/event-stream" \
   -d '{"jsonrpc":"2.0","id":1,"method":"tools/list"}'
 ```
+
+### 실제 Claude Code로 확인 (2026-10-07)
+
+`claude -p`에 일회용 설정을 넘겨, 내 Claude 설정(`~/.claude.json`)을 바꾸지 않고 확인했다. `--strict-mcp-config`가 다른 MCP 서버를 모두 끈다.
+
+```bash
+claude -p "devmng MCP 서버의 도구만 사용해서 프로젝트 목록과 BotMng 상태를 알려줘" \
+  --mcp-config ./claude-mcp-once.json --strict-mcp-config \
+  --allowedTools mcp__devmng --max-budget-usd 0.60 --no-session-persistence
+```
+
+`claude-mcp-once.json`은 `{"mcpServers":{"devmng":{"type":"http","url":"http://127.0.0.1:7007/api/mcp-actions/v1/devmng","headers":{"Authorization":"Bearer <MCP_TOKEN>"}}}}` 형식이다. 토큰이 들어 있으므로 저장소에 올리지 않고 쓴 뒤 지운다.
+
+결과: Claude Code가 `botmng.list-projects`와 `botmng.get-botmng-health` 두 도구를 호출해 프로젝트 3개와 BotMng → ScheduleAlertBot 의존 관계, BotMng 상태 `ok`를 올바르게 가져왔다. 권한 거부는 없었고(4턴, 약 0.09달러), 도구 이름은 Claude Code에서 `mcp__devmng__botmng_list-projects`처럼 보인다.
