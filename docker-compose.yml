@@ -1,0 +1,49 @@
+# 로컬 전용 실행: 포털 + Postgres. 포트는 이 컴퓨터(127.0.0.1)에서만 접속된다.
+#   docker compose up -d --build
+# 필요한 값은 .env 에 적는다 (.env.example 참고, .env 는 git 에서 제외됨).
+services:
+  postgres:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?.env 에 POSTGRES_PASSWORD 를 설정하세요}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U postgres']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  devmng:
+    image: devmng
+    build:
+      context: .
+      dockerfile: packages/backend/Dockerfile
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      # 127.0.0.1 로 묶어서 같은 네트워크의 다른 기기에서는 접속되지 않게 한다
+      - '127.0.0.1:7007:7007'
+    environment:
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: '5432'
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      BOTMNG_URL: ${BOTMNG_URL:-}
+      BOTMNG_SERVICE_PASSWORD: ${BOTMNG_SERVICE_PASSWORD:-}
+    # 운영 설정에 로컬 전용 설정(게스트 로그인 허용)을 더한다
+    command:
+      - node
+      - packages/backend
+      - --config
+      - app-config.yaml
+      - --config
+      - app-config.production.yaml
+      - --config
+      - app-config.docker-local.yaml
+
+volumes:
+  pgdata:

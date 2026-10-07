@@ -24,31 +24,33 @@ docker build . -f packages/backend/Dockerfile -t devmng
 - `.dockerignore`가 `.env`, `*.local.yaml`, `node_modules`를 이미지에서 제외한다. 비밀 값은 이미지에 넣지 않고 실행할 때 환경 변수로 넘긴다.
 - 카탈로그 정의(`catalog/`)는 이미지의 `/app/catalog`에 들어 있고, `app-config.production.yaml`이 그 경로를 가리킨다.
 
-## 실행 (Postgres와 함께)
+## 실행 (로컬 전용)
 
-운영 설정은 Postgres를 쓴다. 로컬에서는 컨테이너 두 개로 확인할 수 있다.
+이 포털은 **내 컴퓨터에서만 접속하는 개인용**이다. `docker compose`로 포털과 Postgres를 함께 띄운다.
 
 ```bash
-docker network create devmng-net
-docker run -d --name devmng-pg --network devmng-net -e POSTGRES_PASSWORD postgres:17-alpine
-
-docker run -d --name devmng --network devmng-net -p 7007:7007 \
-  -e POSTGRES_HOST=devmng-pg -e POSTGRES_PORT=5432 -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD \
-  -e BOTMNG_URL -e BOTMNG_SERVICE_PASSWORD \
-  devmng
+cp .env.example .env     # 값을 채운다 (POSTGRES_PASSWORD 필수, BOTMNG_* 는 BotMng 상태 카드를 쓸 때)
+docker compose up -d --build
+# 접속: http://localhost:7007  → ENTER 버튼으로 게스트 로그인
+docker compose down      # 종료 (데이터는 유지, 지우려면 down -v)
 ```
 
-- `-e NAME`(값 없이)은 현재 셸의 환경 변수를 그대로 넘긴다. 비밀번호가 명령줄이나 `docker inspect`의 명령에 남지 않는다. (`docker inspect`의 환경 변수 목록에는 보일 수 있으니 공유하지 않는다.)
-- BotMng가 호스트에서 돌고 있으면 컨테이너에서는 `https://host.docker.internal:<포트>`로 접속한다.
-- MCP를 함께 쓰려면 `app-config.mcp.example.yaml`을 읽기 전용으로 마운트하고 `--config`로 추가한다 (`docs/mcp.md` 참고).
+- **포트는 `127.0.0.1`에만 열린다** (`docker-compose.yml`의 `127.0.0.1:7007:7007`). 같은 네트워크의 다른 기기에서는 접속되지 않는다.
+- **게스트 로그인**: Backstage는 운영 모드에서 게스트 로그인을 막는다. 로컬 전용 설정 `app-config.docker-local.yaml`이 이를 풀어 준다. 이 설정은 compose가 `--config`로 추가할 때만 적용되고, 이미지의 기본 실행(운영 설정만)에는 들어가지 않는다.
+- `.env`는 git과 이미지에서 제외된다. 비밀 값은 `.env`나 셸 환경 변수로만 넘긴다.
+- BotMng 주소: 컨테이너 안에서 `127.0.0.1`은 컨테이너 자신이다. 호스트의 BotMng는 `host.docker.internal`로 접속할 수 있지만, BotMng 인증서가 공인 인증서가 아니면(자체 서명, Cloudflare Origin) 연결이 거부된다. 공개 주소를 쓰거나 BotMng 인증서를 컨테이너가 신뢰하게 설정한다.
+- MCP를 함께 쓰려면 `app-config.mcp.example.yaml`을 읽기 전용으로 마운트하고 `--config`를 추가한다 (`docs/mcp.md` 참고).
 
 ## 확인한 것
 
-컨테이너를 실제로 띄워 확인했다 (Postgres 컨테이너와 함께, 운영 중인 BotMng에 연결):
-헬스체크 `healthy`, 실행 사용자 `node`, readiness 200, 프론트엔드(`/`) 200, MCP 도구 2개, 카탈로그 프로젝트 3개와 의존 관계, BotMng 상태 `ok`, 토큰 없는 MCP 요청 401, 로그에 토큰·비밀번호 없음, 이미지 안에 `.env`·`*.local.yaml` 없음.
+- 이미지: Postgres 컨테이너와 함께 실행해 헬스체크 `healthy`, 실행 사용자 `node`, readiness 200, MCP 도구 2개, 카탈로그 프로젝트 3개와 의존 관계, BotMng 상태 `ok`, 토큰 없는 MCP 요청 401, 로그에 비밀 값 없음, 이미지 안에 `.env`·`*.local.yaml` 없음.
+- `docker compose`: 포트가 `127.0.0.1`에만 바인딩됨(`docker port`), 브라우저에서 **게스트 로그인 → 카탈로그 → BotMng 페이지의 상태 카드("정상")**까지 동작.
+- 같은 네트워크의 다른 기기에서 접속이 막히는지는 직접 시도하지 않았다(확인한 것은 `127.0.0.1`로만 바인딩된다는 점).
 
-## 배포 전에 해야 할 것 (미확인·미해결)
+## 인터넷에 열 때 해야 할 것 (현재는 범위 밖)
 
-- **로그인 방식**: 운영 설정(`app-config.production.yaml`)은 개발용 게스트 인증(`guest`)만 있다. Backstage는 운영 모드에서 게스트 로그인을 막으므로 컨테이너에서 화면 로그인이 되는지는 확인하지 않았다. 실제로 배포하려면 GitHub 같은 실제 인증으로 바꿔야 한다.
-- **HTTPS와 도메인**: 이미지는 HTTP(7007)만 연다. `baseUrl`은 `http://localhost:7007`이다.
-- 이미지를 레지스트리에 올리거나 서버에 배포하는 단계는 만들지 않았다.
+위 구성은 로컬 전용이다. 다른 사람이나 다른 장소에서 접속하게 만들 때는 다음을 먼저 해야 한다.
+
+- 게스트 로그인(`app-config.docker-local.yaml`)을 쓰지 않는다. 비밀번호가 없어서 주소를 아는 누구나 들어올 수 있다.
+- 접속 경로를 제한한다: VPN/터널(Tailscale, SSH 터널), Cloudflare Access, 또는 Backstage에 GitHub 같은 실제 인증을 붙인다.
+- HTTPS와 도메인을 설정한다 (이미지는 HTTP 7007만 연다).
