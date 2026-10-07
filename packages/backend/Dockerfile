@@ -84,6 +84,7 @@ COPY --from=build --chown=node:node /app/packages/backend/dist/bundle.tar.gz ./
 RUN tar xzf bundle.tar.gz && rm bundle.tar.gz
 COPY --chown=node:node app-config*.yaml ./
 COPY --chown=node:node catalog ./catalog
+COPY --chown=node:node templates ./templates
 
 EXPOSE 7007
 

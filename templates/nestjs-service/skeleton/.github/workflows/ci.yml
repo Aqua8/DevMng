@@ -1,0 +1,46 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# 읽기 권한만 준다 (토큰이 새도 저장소를 바꿀 수 없게)
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: 검증
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      # 액션은 태그가 아니라 커밋 해시로 고정한다 (공급망 공격 대비)
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: '24'
+          cache: npm
+      - name: 의존성 설치 (package-lock.json 고정)
+        run: npm ci
+      # 운영 의존성에 알려진 취약점(높음 이상)이 있으면 실패한다. 개발 의존성은 운영 이미지에 들어가지 않는다.
+      - name: 의존성 취약점 점검 (운영 의존성)
+        run: npm audit --omit=dev --audit-level=high
+      - name: 테스트
+        run: npm test
+      - name: 빌드
+        run: npm run build
+
+  docker:
+    name: Docker 이미지 빌드
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      # 이미지가 만들어지는지만 확인한다 (올리지 않음)
+      - name: 이미지 빌드
+        run: docker build . -t ${{ values.name }}:ci
