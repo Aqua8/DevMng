@@ -26,6 +26,8 @@
   "dependencies": {
     "@backstage/backend-defaults": "^0.18.0",
     "@backstage/backend-plugin-api": "^1.10.1",
+    "@backstage/catalog-model": "^1.10.1",
+    "@backstage/plugin-catalog-node": "^2.2.5",
     "express": "^4.14.0",
     "express-promise-router": "^4.1.0"
   },
@@ -34,7 +36,8 @@
     "@backstage/cli": "^0.36.6",
     "@types/express": "^4.17.6",
     "@types/supertest": "^2.0.12",
-    "supertest": "^6.2.4"
+    "supertest": "^6.2.4",
+    "zod": "^3.25.76 || ^4.0.0"
   },
   "files": [
     "dist",

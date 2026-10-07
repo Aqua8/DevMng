@@ -1,8 +1,8 @@
 import { HttpAuthService } from '@backstage/backend-plugin-api';
 import express from 'express';
 import Router from 'express-promise-router';
-import { BotmngClient, BotmngError } from './botmngClient';
-import { failureView, HealthView, toHealthView } from './health';
+import { BotmngClient } from './botmngClient';
+import { resolveHealth } from './resolveHealth';
 
 export async function createRouter({
   httpAuth,
@@ -20,27 +20,7 @@ export async function createRouter({
   router.get('/health', async (req, res) => {
     await httpAuth.credentials(req, { allow: ['user'] });
 
-    let view: HealthView;
-    if (!client) {
-      view = failureView(
-        'not-configured',
-        'BotMng 연동 설정(botmng.baseUrl, botmng.servicePassword)이 없습니다',
-        now(),
-      );
-    } else {
-      try {
-        view = toHealthView(await client.getHealth(), now());
-      } catch (err) {
-        view =
-          err instanceof BotmngError && err.kind !== 'bad-response'
-            ? failureView(err.kind, err.message, now())
-            : failureView(
-                'unreachable',
-                'BotMng 상태를 확인할 수 없습니다',
-                now(),
-              );
-      }
-    }
+    const view = await resolveHealth(client, now());
     res.json(view);
   });
 

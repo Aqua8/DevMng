@@ -89,7 +89,7 @@ DevMng/
 3. BotMng에 DevMng 전용 서비스 계정 추가 (완료: BotMng PR #15 머지, 운영 서버 반영·확인)
 4. 백엔드 플러그인(서비스 계정 로그인, 토큰 캐시) + 테스트 (완료: PR #1)
 5. 프론트엔드 플러그인(상태 카드) + 테스트 (완료: 이 PR)
-6. MCP 액션 연결과 조회 확인
+6. MCP 액션 연결과 조회 확인 (완료: 이 PR, `docs/mcp.md`)
 7. GitHub Actions CI
 8. Dockerfile
 9. 정리(`simplify`, `code-review`, 백엔드 플러그인과 BotMng 변경은 `security-review`)

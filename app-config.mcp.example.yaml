@@ -1,0 +1,16 @@
+# MCP 클라이언트(Claude Code 등)가 DevMng에 접속하기 위한 인증 설정 예시.
+# 이 파일을 app-config.local.yaml 로 복사해서 쓴다 (app-config.local.yaml 은 저장소에서 제외되고 자동으로 읽힌다).
+# 토큰은 환경 변수 MCP_TOKEN 으로 넘기고, 저장소에는 올리지 않는다.
+#   생성: node -p 'require("crypto").randomBytes(24).toString("base64url")'
+backend:
+  auth:
+    externalAccess:
+      - type: static
+        options:
+          token: ${MCP_TOKEN}
+          subject: mcp-client
+        accessRestrictions:
+          # MCP 플러그인이 호출자의 토큰으로 botmng 의 액션을 조회·실행하므로 botmng 접근이 필요하다.
+          # 카탈로그·scaffolder 등 다른 플러그인에는 접근할 수 없다 (카탈로그는 botmng 가 자기 권한으로 읽는다).
+          - plugin: mcp-actions
+          - plugin: botmng
