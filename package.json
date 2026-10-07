@@ -20,7 +20,8 @@
     "lint": "backstage-cli repo lint --since origin/main",
     "lint:all": "backstage-cli repo lint",
     "prettier:check": "prettier --check .",
-    "new": "backstage-cli new"
+    "new": "backstage-cli new",
+    "verify": "CI=true TURBO_TELEMETRY_DISABLED=1 turbo run lint test build"
   },
   "backstage": {
     "cli": {
@@ -46,6 +47,7 @@
     "jsdom": "^27.1.0",
     "node-gyp": "^10.0.0",
     "prettier": "^2.3.2",
+    "turbo": "^2.11.7",
     "typescript": "~5.8.0"
   },
   "resolutions": {
