@@ -1,8 +1,15 @@
 .git
+.github
 .yarn/cache
 .yarn/install-state.gz
 node_modules
-packages/*/src
-packages/*/node_modules
-plugins
+**/node_modules
+**/dist
+dist-types
+coverage
+docs
+# 로컬 설정과 비밀 값은 이미지에 넣지 않는다
+.env
+.env.*
+!.env.example
 *.local.yaml

@@ -33,23 +33,14 @@ auth:
     guest: {}
 
 catalog:
-  # Overrides the default list locations from app-config.yaml as these contain example data.
-  # See https://backstage.io/docs/features/software-catalog/#adding-components-to-the-catalog for more details
-  # on how to get entities into the catalog.
+  # app-config.yaml 의 위치(../../catalog/...)는 개발용 경로다. 이미지에서는 /app/catalog 에 들어 있다.
+  # 배열은 합쳐지지 않고 통째로 바뀌므로 여기서 전체 목록을 다시 적는다.
   locations:
-    # Local example data, replace this with your production config, these are intended for demo use only.
-    # File locations are relative to the backend process, typically in a deployed context, such as in a Docker container, this will be the root
     - type: file
-      target: ./examples/entities.yaml
-
-    # Local example template
-    - type: file
-      target: ./examples/template/template.yaml
-      rules:
-        - allow: [Template]
-
-    # Local example organizational data
-    - type: file
-      target: ./examples/org.yaml
+      target: ./catalog/org.yaml
       rules:
         - allow: [User, Group]
+    - type: file
+      target: ./catalog/system.yaml
+    - type: file
+      target: ./catalog/components.yaml
