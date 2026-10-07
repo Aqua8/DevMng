@@ -88,7 +88,7 @@ DevMng/
 - [ ] BotMng를 꺼도 카드가 오류 상태를 표시하고 포털은 죽지 않는다.
 - [x] 플러그인 로직 단위 테스트 통과.
 - [x] GitHub Actions에서 tsc, lint, test, build 통과.
-- [ ] Docker 이미지 빌드 성공.
+- [x] Docker 이미지 빌드 성공.
 - [ ] Claude Code에서 MCP로 카탈로그를 조회한다.
 
 ## 6. 작업 순서
@@ -100,7 +100,7 @@ DevMng/
 5. 프론트엔드 플러그인(상태 카드) + 테스트 (완료: 이 PR)
 6. MCP 액션 연결과 조회 확인 (완료: 이 PR, `docs/mcp.md`)
 7. GitHub Actions CI (완료: 이 PR, `.github/workflows/ci.yml`)
-8. Dockerfile
+8. Dockerfile (완료: 이 PR, `packages/backend/Dockerfile`, `docs/docker.md`)
 9. 정리(`simplify`, `code-review`, 백엔드 플러그인과 BotMng 변경은 `security-review`)
 10. 선택 항목 결정(템플릿, Turborepo)
 
