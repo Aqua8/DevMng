@@ -21,6 +21,11 @@ services:
       context: .
       dockerfile: packages/backend/Dockerfile
     restart: unless-stopped
+    # 권한을 줄인다: 새 권한 획득 금지, 리눅스 capability 전부 제거 (포트 7007 은 특별한 권한이 필요 없다)
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
     depends_on:
       postgres:
         condition: service_healthy

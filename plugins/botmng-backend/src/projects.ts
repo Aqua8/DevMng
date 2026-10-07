@@ -2,6 +2,7 @@ import type { Entity } from '@backstage/catalog-model';
 import type { ActionsRegistryService } from '@backstage/backend-plugin-api/alpha';
 import type { AuthService } from '@backstage/backend-plugin-api';
 import type { CatalogService } from '@backstage/plugin-catalog-node';
+import { stringsOnly } from './util';
 
 export interface ProjectView {
   name: string;
@@ -18,8 +19,6 @@ export interface ProjectView {
 export function toProjectView(entity: Entity): ProjectView {
   const spec = (entity.spec ?? {}) as Record<string, unknown>;
   const str = (v: unknown) => (typeof v === 'string' ? v : '');
-  const strings = (v: unknown) =>
-    Array.isArray(v) ? v.filter((x): x is string => typeof x === 'string') : [];
   return {
     name: entity.metadata.name,
     title: entity.metadata.title ?? entity.metadata.name,
@@ -28,7 +27,7 @@ export function toProjectView(entity: Entity): ProjectView {
     owner: str(spec.owner),
     description: entity.metadata.description ?? '',
     tags: entity.metadata.tags ?? [],
-    dependsOn: strings(spec.dependsOn),
+    dependsOn: stringsOnly(spec.dependsOn),
   };
 }
 

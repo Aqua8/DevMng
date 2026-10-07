@@ -1,8 +1,9 @@
 import type { ActionsRegistryService } from '@backstage/backend-plugin-api/alpha';
 import { z } from 'zod/v3';
 import { registerHealthAction } from './action';
+import { failingClient, NOW } from './testUtils';
 
-const now = () => new Date('2026-10-07T00:00:00Z');
+const now = () => NOW;
 
 function setup(client?: { getHealth: () => Promise<unknown> }) {
   const register = jest.fn();
@@ -36,11 +37,9 @@ describe('get-botmng-health 액션', () => {
   });
 
   it('BotMng에 연결할 수 없어도 오류 대신 상태로 알린다', async () => {
-    const action = setup({
-      getHealth: async () => {
-        throw new Error('connect ECONNREFUSED 10.0.0.5');
-      },
-    });
+    const action = setup(
+      failingClient(new Error('connect ECONNREFUSED 10.0.0.5')),
+    );
     const { output } = await action.action({});
     expect(output.status).toBe('unreachable');
     expect(JSON.stringify(output)).not.toContain('10.0.0.5');

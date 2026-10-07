@@ -7,15 +7,14 @@ import express from 'express';
 import request from 'supertest';
 import { BotmngClient, BotmngError } from './botmngClient';
 import { createRouter } from './router';
-
-const now = new Date('2026-10-07T00:00:00Z');
+import { failingClient, NOW } from './testUtils';
 
 describe('createRouter', () => {
   const build = async (client?: Pick<BotmngClient, 'getHealth'>) => {
-    const router = await createRouter({
+    const router = createRouter({
       httpAuth: mockServices.httpAuth(),
       client: client as BotmngClient,
-      now: () => now,
+      now: () => NOW,
     });
     const app = express();
     app.use(router);
@@ -32,27 +31,25 @@ describe('createRouter', () => {
     expect(res.body).toEqual({
       status: 'ok',
       issues: [],
-      checkedAt: now.toISOString(),
+      checkedAt: NOW.toISOString(),
     });
   });
 
   it('BotMng에 연결할 수 없어도 200 으로 unreachable 을 알린다', async () => {
-    const app = await build({
-      getHealth: async () => {
-        throw new BotmngError('unreachable', 'BotMng에 연결할 수 없습니다');
-      },
-    });
+    const app = await build(
+      failingClient(
+        new BotmngError('unreachable', 'BotMng에 연결할 수 없습니다'),
+      ),
+    );
     const res = await request(app).get('/health');
     expect(res.status).toBe(200);
     expect(res.body.status).toBe('unreachable');
   });
 
   it('예상하지 못한 오류도 포털을 죽이지 않고 unreachable 로 알린다', async () => {
-    const app = await build({
-      getHealth: async () => {
-        throw new Error('boom: https://internal.example/secret');
-      },
-    });
+    const app = await build(
+      failingClient(new Error('boom: https://internal.example/secret')),
+    );
     const res = await request(app).get('/health');
     expect(res.status).toBe(200);
     expect(res.body.status).toBe('unreachable');
