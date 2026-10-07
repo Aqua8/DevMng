@@ -126,10 +126,11 @@ backend:
     connection: ':memory:'
   # see https://backstage.io/docs/ai/mcp-actions#actions-configuration for more details
   actions:
+    # MCP로 열 수 있는 액션을 내놓는 플러그인. botmng(프로젝트·상태 조회, 읽기 전용)만 둔다.
+    # catalog 는 뺐다: 카탈로그 액션에는 엔티티 등록·삭제가 있어 AI에게 열지 않고,
+    # 조회는 botmng 플러그인의 list-projects 가 자기 권한으로 대신 한다.
     pluginSources:
-      - auth
-      - catalog
-      - scaffolder
+      - botmng
   # workingDirectory: /tmp # Use this to configure a working directory for the scaffolder, defaults to the OS temp-dir
 
 integrations:
@@ -215,5 +216,17 @@ permission:
 
 # see https://backstage.io/docs/ai/mcp-actions for more details
 mcpActions:
-  name: 'DevMng' # defaults to "backstage"
-  description: 'Tools for managing your software catalog, creating new services from templates, and exploring your developer portal' # optional
+  namespacedToolNames: true # 도구 이름에 플러그인 이름이 붙는다 (예: catalog.get-catalog-entity)
+  servers:
+    devmng:
+      name: 'DevMng'
+      description: '내 개인 프로젝트 카탈로그와 BotMng 상태를 조회하는 읽기 전용 도구'
+      instructions: >-
+        botmng.list-projects 로 카탈로그의 프로젝트(ScheduleAlertBot, BotMng, Portfolio)와
+        의존 관계를 조회하고, botmng.get-botmng-health 로 BotMng의 현재 상태를 확인한다.
+        모든 도구는 읽기 전용이다.
+      filter:
+        include:
+          # 읽기 전용 액션만 노출한다 (이중 안전장치)
+          - attributes:
+              readOnly: true

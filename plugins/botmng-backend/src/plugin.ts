@@ -2,6 +2,10 @@ import {
   coreServices,
   createBackendPlugin,
 } from '@backstage/backend-plugin-api';
+import { actionsRegistryServiceRef } from '@backstage/backend-plugin-api/alpha';
+import { catalogServiceRef } from '@backstage/plugin-catalog-node';
+import { registerHealthAction } from './action';
+import { registerProjectsAction } from './projects';
 import { BotmngClient } from './botmngClient';
 import { createRouter } from './router';
 
@@ -16,12 +20,23 @@ export const botmngPlugin = createBackendPlugin({
   register(env) {
     env.registerInit({
       deps: {
+        actionsRegistry: actionsRegistryServiceRef,
+        auth: coreServices.auth,
+        catalog: catalogServiceRef,
         config: coreServices.rootConfig,
         httpAuth: coreServices.httpAuth,
         httpRouter: coreServices.httpRouter,
         logger: coreServices.logger,
       },
-      async init({ config, httpAuth, httpRouter, logger }) {
+      async init({
+        actionsRegistry,
+        auth,
+        catalog,
+        config,
+        httpAuth,
+        httpRouter,
+        logger,
+      }) {
         const baseUrl = config.getOptionalString('botmng.baseUrl');
         const password = config.getOptionalString('botmng.servicePassword');
         if (!baseUrl || !password) {
@@ -29,15 +44,13 @@ export const botmngPlugin = createBackendPlugin({
             'botmng.baseUrl 또는 botmng.servicePassword 가 없어 BotMng 상태는 not-configured 로 표시됩니다',
           );
         }
-        httpRouter.use(
-          await createRouter({
-            httpAuth,
-            client:
-              baseUrl && password
-                ? new BotmngClient({ baseUrl, password })
-                : undefined,
-          }),
-        );
+        const client =
+          baseUrl && password
+            ? new BotmngClient({ baseUrl, password })
+            : undefined;
+        httpRouter.use(await createRouter({ httpAuth, client }));
+        registerHealthAction(actionsRegistry, client);
+        registerProjectsAction(actionsRegistry, { catalog, auth });
       },
     });
   },

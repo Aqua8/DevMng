@@ -19,6 +19,10 @@ BotMng 서비스 계정(`devmng`)으로 토큰을 받아 `GET /api/health`만 �
 | `unauthorized`          | 서비스 계정 인증·권한 실패                 |
 | `not-configured`        | 연동 설정이 없음                           |
 
+## MCP 도구
+
+이 플러그인은 읽기 전용 액션 2개를 MCP로 내놓는다 (`botmng.list-projects`, `botmng.get-botmng-health`). 사용법과 안전 설계는 [`docs/mcp.md`](../../docs/mcp.md).
+
 ## 동작
 
 - `POST /api/auth/service`로 15분짜리 토큰을 받아 캐시하고 만료 1분 전에 다시 받는다 (BotMng의 로그인 횟수 제한: IP당 분당 10회).
