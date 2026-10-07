@@ -1,8 +1,8 @@
 apiVersion: backstage.io/v1alpha1
 kind: Component
 metadata:
-  name: dev-portal
-  description: An example of a Backstage application.
+  name: dev-mng
+  description: 개인 프로젝트를 한곳에서 보는 Backstage 기반 개발자 포털
   # Example for optional annotations
   # annotations:
   #   github.com/project-slug: backstage/backstage

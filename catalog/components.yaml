@@ -1,0 +1,62 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: schedule-alert-bot
+  title: ScheduleAlertBot
+  description: Google Calendar·Tasks 일정을 매일 아침 Discord로 요약해 보내고, 자연어로 일정과 할 일을 관리하는 개인용 비서 봇
+  tags: [typescript, nodejs, discord, llm]
+  annotations:
+    github.com/project-slug: Aqua8/ScheduleAlertBot
+  links:
+    - url: https://github.com/Aqua8/ScheduleAlertBot
+      title: GitHub
+      icon: github
+spec:
+  type: service
+  lifecycle: production
+  owner: group:default/personal
+  system: personal-projects
+---
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: botmng
+  title: BotMng
+  description: ScheduleAlertBot이 남기는 로그를 MariaDB에 저장하고 웹에서 조회·검색·실시간 확인하는 로그 관제 서비스
+  tags: [typescript, nestjs, react, mariadb, monitoring]
+  annotations:
+    github.com/project-slug: Aqua8/BotMng
+  links:
+    - url: https://github.com/Aqua8/BotMng
+      title: GitHub
+      icon: github
+spec:
+  type: service
+  lifecycle: production
+  owner: group:default/personal
+  system: personal-projects
+  dependsOn:
+    - component:default/schedule-alert-bot
+---
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: portfolio
+  title: Portfolio
+  description: 내 프로젝트와 경력을 보여 주는 React 포트폴리오 사이트 (GitHub Pages)
+  tags: [react, vite, github-actions]
+  annotations:
+    github.com/project-slug: Aqua8/Portfolio
+  links:
+    - url: https://github.com/Aqua8/Portfolio
+      title: GitHub
+      icon: github
+    - url: https://hwp-portfolio.com/
+      title: 사이트
+      icon: web
+spec:
+  type: website
+  lifecycle: production
+  owner: group:default/personal
+  system: personal-projects
+  dependsOn: []

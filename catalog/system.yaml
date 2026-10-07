@@ -1,0 +1,7 @@
+apiVersion: backstage.io/v1alpha1
+kind: System
+metadata:
+  name: personal-projects
+  description: 내 개인 프로젝트 모음 (비서 봇, 로그 관제, 포트폴리오)
+spec:
+  owner: group:default/personal
