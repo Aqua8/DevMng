@@ -1,0 +1,52 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# 같은 브랜치에서 새 커밋이 오면 이전 실행은 취소한다
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+# 읽기 권한만 준다 (토큰이 새도 저장소를 바꿀 수 없게)
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: 검증 (Node ${{ matrix.node }})
+    runs-on: ubuntu-24.04 # ubuntu-latest 는 2026-10-19부터 Ubuntu 26으로 바뀌므로 버전을 고정한다
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        node: ['22', '24'] # package.json engines: "22 || 24"
+    steps:
+      # 액션은 태그가 아니라 커밋 해시로 고정한다 (공급망 공격 대비). 버전은 주석 참고
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: ${{ matrix.node }}
+          cache: yarn
+
+      - name: 의존성 설치 (yarn.lock 고정)
+        run: yarn install --immutable
+
+      - name: 타입 검사
+        run: yarn tsc
+
+      - name: 린트
+        run: yarn lint:all
+
+      - name: 서식 검사
+        run: yarn prettier:check
+
+      - name: 단위 테스트
+        run: yarn test
+        env:
+          CI: 'true'
+
+      - name: 빌드
+        run: yarn build:all
