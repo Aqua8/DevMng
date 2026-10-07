@@ -102,7 +102,7 @@ DevMng/
 7. GitHub Actions CI (완료: 이 PR, `.github/workflows/ci.yml`)
 8. Dockerfile (완료: 이 PR, `packages/backend/Dockerfile`, `docs/docker.md`)
 9. 정리(`simplify`, `code-review`, 백엔드 플러그인과 BotMng 변경은 `security-review`) (완료: 이 PR, 결과는 `docs/security.md`)
-10. 선택 항목: Turborepo (완료: 이 PR, `docs/turborepo.md`), 소프트웨어 템플릿 (별도 PR)
+10. 선택 항목: Turborepo (완료: PR #9, `docs/turborepo.md`), 소프트웨어 템플릿 (완료: 이 PR, `docs/template.md`)
 
 ## 7. 확인 필요
 

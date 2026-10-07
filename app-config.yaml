@@ -205,6 +205,11 @@ catalog:
       target: ../../catalog/system.yaml
     - type: file
       target: ../../catalog/components.yaml
+    # 새 NestJS 서비스를 만드는 소프트웨어 템플릿 (docs/template.md)
+    - type: file
+      target: ../../templates/nestjs-service/template.yaml
+      rules:
+        - allow: [Template]
 
 kubernetes:
   # see https://backstage.io/docs/features/kubernetes/configuration for kubernetes configuration options

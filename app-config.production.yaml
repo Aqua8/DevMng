@@ -51,3 +51,7 @@ catalog:
       target: ./catalog/system.yaml
     - type: file
       target: ./catalog/components.yaml
+    - type: file
+      target: ./templates/nestjs-service/template.yaml
+      rules:
+        - allow: [Template]

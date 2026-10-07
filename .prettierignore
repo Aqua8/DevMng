@@ -2,4 +2,6 @@ dist
 dist-types
 coverage
 .vscode
+# 소프트웨어 템플릿의 뼈대는 ${{ }} 템플릿 문법이 들어 있어 올바른 JSON/YAML 이 아니다 (docs/template.md)
+templates/*/skeleton
 .turbo
