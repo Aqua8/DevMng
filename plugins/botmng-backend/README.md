@@ -12,12 +12,12 @@ BotMng 서비스 계정(`devmng`)으로 토큰을 받아 `GET /api/health`만 �
 { "status": "ok", "issues": [], "checkedAt": "2026-10-07T00:00:00.000Z" }
 ```
 
-| status | 의미 |
-|---|---|
-| `ok` / `warn` / `error` | BotMng가 알려 준 상태 (`issues`에 이유) |
-| `unreachable` | BotMng에 연결할 수 없음 (포털은 정상 동작) |
-| `unauthorized` | 서비스 계정 인증·권한 실패 |
-| `not-configured` | 연동 설정이 없음 |
+| status                  | 의미                                       |
+| ----------------------- | ------------------------------------------ |
+| `ok` / `warn` / `error` | BotMng가 알려 준 상태 (`issues`에 이유)    |
+| `unreachable`           | BotMng에 연결할 수 없음 (포털은 정상 동작) |
+| `unauthorized`          | 서비스 계정 인증·권한 실패                 |
+| `not-configured`        | 연동 설정이 없음                           |
 
 ## 동작
 
@@ -29,9 +29,9 @@ BotMng 서비스 계정(`devmng`)으로 토큰을 받아 `GET /api/health`만 �
 
 `app-config.yaml`의 `botmng`. 값은 환경 변수로만 받는다 (`.env.example` 참고).
 
-| 키 | 환경 변수 | 설명 |
-|---|---|---|
-| `botmng.baseUrl` | `BOTMNG_URL` | BotMng 주소 |
+| 키                       | 환경 변수                 | 설명                                                                 |
+| ------------------------ | ------------------------- | -------------------------------------------------------------------- |
+| `botmng.baseUrl`         | `BOTMNG_URL`              | BotMng 주소                                                          |
 | `botmng.servicePassword` | `BOTMNG_SERVICE_PASSWORD` | BotMng 서버 `.env`의 `DEVMNG_PASSWORD`와 같은 값 (`secret`으로 표시) |
 
 ## 개발
